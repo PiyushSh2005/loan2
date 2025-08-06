@@ -75,3 +75,38 @@ if st.button("Predict"):
 
     except Exception as e:
         st.error(f"Prediction failed: {e}")
+With this enhanced version including charts:
+
+✅ Enhanced Prediction Block with Charts
+python
+Copy
+Edit
+if st.button("Predict"):
+    try:
+        prediction = model.predict(input_encoded)
+        proba = model.predict_proba(input_encoded)[0][1]
+
+        result = "Approved ✅" if prediction[0] == 1 else "Rejected ❌"
+        st.success(f"🏁 Loan Prediction: {result}")
+        st.info(f"💡 Model confidence (approval): {proba:.2%}")
+
+        # Chart 1: Model Confidence Bar Chart
+        st.subheader("📊 Model Confidence")
+        fig1, ax1 = plt.subplots()
+        ax1.bar(["Rejected", "Approved"], [1 - proba, proba], color=['red', 'green'])
+        ax1.set_ylabel("Probability")
+        ax1.set_ylim(0, 1)
+        st.pyplot(fig1)
+
+        # Chart 2: Loan vs. Income Comparison
+        st.subheader("💰 Loan vs. Income Comparison")
+        income_total = applicant_income + coapplicant_income
+        fig2, ax2 = plt.subplots()
+        ax2.bar(["Total Income", "Loan Amount (×1000)"], [income_total, loan_amount], color=['blue', 'orange'])
+        ax2.set_ylabel("Amount")
+        ax2.set_title("Loan Request vs Total Income")
+        st.pyplot(fig2)
+
+    except Exception as e:
+        st.error(f"Prediction failed: {e}")
+
