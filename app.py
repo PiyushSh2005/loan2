@@ -75,7 +75,7 @@ if st.button("Predict"):
 
     except Exception as e:
         st.error(f"Prediction failed: {e}")
-With this enhanced version including charts:
+
 
 #✅ Enhanced Prediction Block with Charts
 
@@ -107,4 +107,5 @@ if st.button("Predict"):
 
     except Exception as e:
         st.error(f"Prediction failed: {e}")
+
 
