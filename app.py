@@ -26,6 +26,10 @@ def predict(df):
         st.error(f"Error during prediction: {e}")
         return None
 
+# ===========================
+# ✅ MANUAL INPUT SECTION
+# ===========================
+
 if input_type == "Manual Input":
     st.header("Enter Applicant Details")
 
@@ -73,3 +77,69 @@ if input_type == "Manual Input":
         except Exception as e:
             st.error(f"Prediction failed: {e}")
 
+# ===========================
+# ✅ CSV UPLOAD SECTION
+# ===========================
+
+elif input_type == "Upload CSV":
+    st.header("Upload CSV File")
+    uploaded_file = st.file_uploader("Upload your input CSV file", type=["csv"])
+
+    if uploaded_file is not None:
+        try:
+            df = pd.read_csv(uploaded_file)
+            st.subheader("📄 Uploaded Data Preview")
+            st.dataframe(df)
+
+            # One-hot encode + align columns
+            df_encoded = pd.get_dummies(df)
+            df_encoded = df_encoded.reindex(columns=expected_features, fill_value=0)
+
+            # Predictions and probabilities
+            predictions = model.predict(df_encoded)
+            probabilities = model.predict_proba(df_encoded)[:, 1]
+
+            df['Prediction'] = predictions
+            df['Approval Probability'] = probabilities
+
+            st.subheader("🧾 Prediction Results")
+            st.dataframe(df)
+
+            # ✅ Chart 1: Bar Chart of Predictions
+            st.subheader("📊 Loan Approval Counts")
+            counts = df['Prediction'].value_counts().rename({0: "Rejected", 1: "Approved"})
+            fig1, ax1 = plt.subplots()
+            counts.plot(kind='bar', color=['red', 'green'], ax=ax1)
+            ax1.set_ylabel("Number of Applicants")
+            ax1.set_title("Loan Approval Distribution")
+            st.pyplot(fig1)
+
+            # ✅ Chart 2: Pie Chart
+            st.subheader("🥧 Approval Rate Pie Chart")
+            fig2, ax2 = plt.subplots()
+            ax2.pie(counts, labels=counts.index, autopct='%1.1f%%', startangle=90, colors=['red', 'green'])
+            ax2.axis('equal')
+            st.pyplot(fig2)
+
+            # ✅ Chart 3: Histogram of Loan Amount by Approval
+            st.subheader("💰 Loan Amount Distribution by Approval")
+            fig3, ax3 = plt.subplots()
+            df[df['Prediction'] == 1]['LoanAmount'].plot(kind='hist', alpha=0.6, bins=20, label='Approved', color='green', ax=ax3)
+            df[df['Prediction'] == 0]['LoanAmount'].plot(kind='hist', alpha=0.6, bins=20, label='Rejected', color='red', ax=ax3)
+            ax3.set_xlabel("Loan Amount")
+            ax3.set_title("Loan Amounts by Approval Status")
+            ax3.legend()
+            st.pyplot(fig3)
+
+            # ✅ Chart 4: Histogram of Income by Approval
+            st.subheader("👤 Applicant Income by Approval")
+            fig4, ax4 = plt.subplots()
+            df[df['Prediction'] == 1]['ApplicantIncome'].plot(kind='hist', alpha=0.6, bins=20, label='Approved', color='green', ax=ax4)
+            df[df['Prediction'] == 0]['ApplicantIncome'].plot(kind='hist', alpha=0.6, bins=20, label='Rejected', color='red', ax=ax4)
+            ax4.set_xlabel("Applicant Income")
+            ax4.set_title("Income Distribution by Approval")
+            ax4.legend()
+            st.pyplot(fig4)
+
+        except Exception as e:
+            st.error(f"Something went wrong: {e}")
