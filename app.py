@@ -67,7 +67,8 @@ if input_type == "Manual Input":
         prediction = predict(input_encoded)
         if prediction is not None:
             st.success(f"🏁 Loan Prediction: {'Approved ✅' if prediction[0] == 1 else 'Rejected ❌'}")
-
+proba = model.predict_proba(input_encoded)[0][1]
+st.info(f"Model confidence (approval): {proba:.2%}")
 # CSV Upload
 else:
     st.header("Upload CSV File")
@@ -96,4 +97,5 @@ else:
             st.pyplot(fig)
         except Exception as e:
             st.error(f"Something went wrong: {e}")
+
 
