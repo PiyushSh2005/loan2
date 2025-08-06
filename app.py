@@ -109,4 +109,3 @@ if st.button("Make Prediction", key="predict_button"):
         st.error(f"Prediction failed: {e}")
 
 
-
