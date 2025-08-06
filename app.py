@@ -64,7 +64,7 @@ if input_type == "Manual Input":
     if st.button("Predict"):
         try:
             prediction = model.predict(input_encoded)
-            proba = model.predict_proba(input_encoded)[0][1]
+           
 
             result = "Approved ✅" if prediction[0] == 1 else "Rejected ❌"
             st.success(f"🏁 Loan Prediction: {result}")
@@ -72,6 +72,7 @@ if input_type == "Manual Input":
 
         except Exception as e:
             st.error(f"Prediction failed: {e}")
-
+proba = model.predict_proba(input_encoded)[0][1]
 st.info(f"💡 Model confidence (approval): {proba:.2%}")
+
 
