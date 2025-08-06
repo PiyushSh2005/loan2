@@ -77,10 +77,8 @@ if st.button("Predict"):
         st.error(f"Prediction failed: {e}")
 With this enhanced version including charts:
 
-✅ Enhanced Prediction Block with Charts
-python
-Copy
-Edit
+#✅ Enhanced Prediction Block with Charts
+
 if st.button("Predict"):
     try:
         prediction = model.predict(input_encoded)
