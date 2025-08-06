@@ -26,11 +26,10 @@ def predict(df):
         st.error(f"Error during prediction: {e}")
         return None
 
-# Manual Input
 if input_type == "Manual Input":
     st.header("Enter Applicant Details")
 
-    # Example fields – ADD MORE to match your training data
+    # Input fields
     gender = st.selectbox("Gender", ["Male", "Female"])
     married = st.selectbox("Married", ["Yes", "No"])
     dependents = st.selectbox("Dependents", ["0", "1", "2", "3+"])
@@ -43,32 +42,31 @@ if input_type == "Manual Input":
     credit_history = st.selectbox("Credit History", [1.0, 0.0])
     property_area = st.selectbox("Property Area", ["Urban", "Semiurban", "Rural"])
 
-    # Convert to numeric DataFrame based on your model features
-    input_dict = {
-        'Gender': 1 if gender == "Male" else 0,
-        'Married': 1 if married == "Yes" else 0,
-        'Dependents': 3 if dependents == "3+" else int(dependents),
-        'Education': 1 if education == "Graduate" else 0,
-        'Self_Employed': 1 if self_employed == "Yes" else 0,
+    # Raw input DataFrame
+    raw_input = pd.DataFrame([{
+        'Gender': gender,
+        'Married': married,
+        'Dependents': dependents,
+        'Education': education,
+        'Self_Employed': self_employed,
         'ApplicantIncome': applicant_income,
         'CoapplicantIncome': coapplicant_income,
         'LoanAmount': loan_amount,
         'Loan_Amount_Term': loan_term,
         'Credit_History': credit_history,
-        'Property_Area': {'Urban': 2, 'Semiurban': 1, 'Rural': 0}[property_area]
-    }
+        'Property_Area': property_area
+    }])
 
-    input_df = pd.DataFrame([input_dict])
+    # One-hot encoding to match training
+    input_encoded = pd.get_dummies(raw_input)
 
-    # Match feature columns
-    try:
-        input_df = input_df[expected_features]
-        if st.button("Predict"):
-            prediction = predict(input_df)
-            if prediction is not None:
-                st.success(f"🏁 Loan Prediction: {'Approved ✅' if prediction[0] == 1 else 'Rejected ❌'}")
-    except KeyError as e:
-        st.error(f"Missing input for: {e}")
+    # Reindex to expected columns
+    input_encoded = input_encoded.reindex(columns=expected_features, fill_value=0)
+
+    if st.button("Predict"):
+        prediction = predict(input_encoded)
+        if prediction is not None:
+            st.success(f"🏁 Loan Prediction: {'Approved ✅' if prediction[0] == 1 else 'Rejected ❌'}")
 
 # CSV Upload
 else:
@@ -98,3 +96,4 @@ else:
             st.pyplot(fig)
         except Exception as e:
             st.error(f"Something went wrong: {e}")
+
