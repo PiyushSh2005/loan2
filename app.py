@@ -79,7 +79,7 @@ if st.button("Predict"):
 
 #✅ Enhanced Prediction Block with Charts
 
-if st.button("Predict"):
+if st.button("Make Prediction", key="predict_button"):
     try:
         prediction = model.predict(input_encoded)
         proba = model.predict_proba(input_encoded)[0][1]
@@ -107,5 +107,6 @@ if st.button("Predict"):
 
     except Exception as e:
         st.error(f"Prediction failed: {e}")
+
 
 
