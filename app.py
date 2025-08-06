@@ -73,4 +73,5 @@ if input_type == "Manual Input":
         except Exception as e:
             st.error(f"Prediction failed: {e}")
 
+st.info(f"💡 Model confidence (approval): {proba:.2%}")
 
