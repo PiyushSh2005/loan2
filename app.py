@@ -57,46 +57,20 @@ if input_type == "Manual Input":
         'Property_Area': property_area
     }])
 
-    # One-hot encoding to match training
+    # One-hot encode
     input_encoded = pd.get_dummies(raw_input)
-
-    # Reindex to expected columns
     input_encoded = input_encoded.reindex(columns=expected_features, fill_value=0)
 
     if st.button("Predict"):
-        prediction = predict(input_encoded)
-        if prediction is not None:
-            st.success(f"🏁 Loan Prediction: {'Approved ✅' if prediction[0] == 1 else 'Rejected ❌'}")
-
-# CSV Upload
-else:
-    st.header("Upload CSV File")
-    uploaded_file = st.file_uploader("Upload your input CSV file", type=["csv"])
-    
-    if uploaded_file is not None:
         try:
-            df = pd.read_csv(uploaded_file)
-            st.subheader("📄 Uploaded Data Preview")
-            st.dataframe(df)
+            prediction = model.predict(input_encoded)
+            proba = model.predict_proba(input_encoded)[0][1]
 
-            df = df[expected_features]
-            predictions = predict(df)
-            df['Prediction'] = predictions
+            result = "Approved ✅" if prediction[0] == 1 else "Rejected ❌"
+            st.success(f"🏁 Loan Prediction: {result}")
+            st.info(f"💡 Model confidence (approval): {proba:.2%}")
 
-            st.subheader("🧾 Prediction Results")
-            st.dataframe(df)
-
-            # Plot bar chart
-            st.subheader("📊 Loan Approval Distribution")
-            counts = df['Prediction'].value_counts().rename({0: "Rejected", 1: "Approved"})
-            fig, ax = plt.subplots()
-            counts.plot(kind='bar', color=['red', 'green'], ax=ax)
-            ax.set_ylabel("Count")
-            ax.set_title("Loan Approval Results")
-            st.pyplot(fig)
         except Exception as e:
-            st.error(f"Something went wrong: {e}")
+            st.error(f"Prediction failed: {e}")
 
 
-proba = model.predict_proba(input_encoded)[0][1]
-st.info(f"Model confidence (approval): {proba:.2%}")
