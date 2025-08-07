@@ -2,46 +2,15 @@ import streamlit as st
 import pandas as pd
 import joblib
 import matplotlib.pyplot as plt
-import base64
 
-# ======================
-# 🔹 Set background image
-# ======================
-def add_bg_from_local(image_file):
-    with open(image_file, "rb") as f:
-        data = f.read()
-    encoded = base64.b64encode(data).decode()
-    css = f"""
-    <style>
-    .stApp {{
-        background-image: url("data:image/jpg;base64,{encoded}");
-        background-size: cover;
-        background-repeat: no-repeat;
-        background-attachment: fixed;
-    }}
-    </style>
-    """
-    st.markdown(css, unsafe_allow_html=True)
-
-# Set background image file
-add_bg_from_local("background.jpg")  # Change to your file name
-
-# ======================
-# 🔹 App Configuration
-# ======================
-st.set_page_config(layout="wide")
-st.title("🏦 Loan Approval Prediction App")
-
-# ======================
-# 🔹 Load model and scaler
-# ======================
+# Load model and scaler
 model = joblib.load("model.pkl")
 scaler = joblib.load("scaler.pkl")
 expected_features = scaler.feature_names_in_
 
-# ======================
-# 🔹 Prediction Function
-# ======================
+st.set_page_config(layout="wide")
+st.title("🏦 Loan Approval Prediction App")
+
 def predict(df):
     try:
         df = df[expected_features]
@@ -51,17 +20,16 @@ def predict(df):
         st.error(f"Prediction error: {e}")
         return None, None
 
-# ======================
-# 🔹 Layout: Two Columns
-# ======================
+# ➡️ Create two columns
 left_col, right_col = st.columns(2)
 
 # =======================
-# 🔹 LEFT COLUMN: Inputs
+# 🔹 LEFT COLUMN: Inputs + Quick Predict
 # =======================
 with left_col:
     st.header("Enter Applicant Details")
 
+    # Input fields
     gender = st.selectbox("Gender", ["Male", "Female"])
     married = st.selectbox("Married", ["Yes", "No"])
     dependents = st.selectbox("Dependents", ["0", "1", "2", "3+"])
@@ -74,7 +42,7 @@ with left_col:
     credit_history = st.selectbox("Credit History", [1.0, 0.0])
     property_area = st.selectbox("Property Area", ["Urban", "Semiurban", "Rural"])
 
-    # Prepare DataFrame
+    # Prepare input
     raw_input = pd.DataFrame([{
         'Gender': gender,
         'Married': married,
@@ -92,6 +60,7 @@ with left_col:
     input_encoded = pd.get_dummies(raw_input)
     input_encoded = input_encoded.reindex(columns=expected_features, fill_value=0)
 
+    # 🔘 Left button: Quick Predict (result only)
     if st.button("Predict", key="left_predict"):
         prediction, proba = predict(input_encoded)
         if prediction is not None:
@@ -101,11 +70,12 @@ with left_col:
             st.info(f"💡 Confidence: {confidence:.2%}")
 
 # =========================
-# 🔸 RIGHT COLUMN: Charts
+# 🔸 RIGHT COLUMN: Charts & Analysis
 # =========================
 with right_col:
     st.header("📊 Prediction Analysis")
 
+    # 🔘 Right button: Predict + Show Charts
     if st.button("Make Prediction with Charts", key="right_predict"):
         prediction, proba = predict(input_encoded)
         if prediction is not None:
